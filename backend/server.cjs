@@ -468,7 +468,7 @@ app.get('/orcamentos-detalhe/:id', async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
-//Cmente fdsflksdlfkdslçfk
+
 // Atualizar item de orçamento
 app.put('/itensOrcamento/:itemId', async (req, res) => {
   const { itemId } = req.params
@@ -589,6 +589,130 @@ app.delete('/itensOrcamento/:itemId', async (req, res) => {
     res.json({ deleted: result.rowCount })
   } catch (err) {
     res.status(500).json({ error: err.message })
+  }
+})
+
+// Rotas Receber
+
+app.get('/receber', async (req, res) => {
+  const query = `
+    SELECT
+      r.*,
+      c.cpf AS cliente_cpf,
+      c.nome AS cliente_nome
+    FROM
+      receber r
+    JOIN
+      clientes c ON c.id = r.cliente_id
+    ORDER BY
+      c.nome
+  `
+
+  try {
+    const result = await pool.query(query)
+
+    // 🔥 Garante que SEMPRE retorna array (fetch() adora isso)
+    return res.status(200).json(result.rows || [])
+  } catch (err) {
+    console.error('Erro ao buscar receber:', err)
+
+    // 🔥 Isso evita que fetch() quebre
+    return res.status(500).json({
+      error: true,
+      message: 'Erro ao buscar registros de receber.',
+    })
+  }
+})
+
+app.post('/receber', async (req, res) => {
+  const {
+    cliente_id,
+    descricao,
+    valor,
+    valorpago = 0,
+    valorpendente,
+    datavencimento,
+    datapagamento,
+    datacadastro,
+    formapagamento,
+    observacao,
+    usuario,
+    referencia,
+    numero_documento,
+    juros = 0,
+    desconto = 0,
+  } = req.body
+
+  const client = await pool.connect()
+
+  try {
+    const valororiginal = Number(valor)
+
+    // 1 - Buscar limite do cliente
+    const rCliente = await client.query('SELECT limite FROM clientes WHERE id = $1', [cliente_id])
+
+    if (rCliente.rowCount === 0) {
+      return res.status(404).json({ message: 'Cliente não encontrado.' })
+    }
+
+    const limite = Number(rCliente.rows[0].limite)
+
+    // 2 - Dívida atual
+    const rDivida = await client.query(
+      `SELECT SUM(valor - COALESCE(valorpago, 0)) AS dividaAtual
+       FROM receber
+       WHERE cliente_id = $1 AND (valorpago IS NULL OR valor > valorpago)`,
+      [cliente_id],
+    )
+
+    const dividaAtual = Number(rDivida.rows[0].dividaatual) || 0
+
+    // 3 - Validar limite
+    if (dividaAtual + valororiginal > limite) {
+      return res.status(403).json({
+        message: 'Limite excedido.',
+        dividaAtual,
+        limite,
+        valorTentado: valororiginal,
+      })
+    }
+
+    // 4 - Inserir registro
+    const sql = `
+      INSERT INTO receber (
+        cliente_id, descricao, valororiginal, valor, valorpago, valorpendente,
+        datavencimento, datapagamento, datacadastro, status,
+        formapagamento, observacao, usuario, referencia,
+        numero_documento, juros, desconto
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'ABERTO',$10,$11,$12,$13,$14,$15,$16)
+    `
+
+    await client.query(sql, [
+      cliente_id,
+      descricao,
+      valororiginal,
+      valor,
+      valorpago,
+      valorpendente,
+      datavencimento,
+      datapagamento,
+      datacadastro,
+      formapagamento,
+      observacao,
+      usuario,
+      referencia,
+      numero_documento,
+      juros,
+      desconto,
+    ])
+
+    res.status(201).json({ message: 'Conta salva com sucesso.' })
+  } catch (err) {
+    console.error('Erro ao salvar receber:', err)
+    res.status(500).json({ message: 'Erro interno do servidor.' })
+  } finally {
+    client.release()
   }
 })
 
