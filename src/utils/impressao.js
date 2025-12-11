@@ -14,18 +14,30 @@ export async function buscarOrcamento(id) {
 
 export function gerarTextoCupom(orc) {
   const numero = orc?.numero ?? '-'
-  const cliente = orc?.clienteNome ?? '-'
-  const clientecpf = orc?.clienteCPF ?? '-'
-  const data = orc?.dataCriacao ?? '-'
-  const validade = orc?.validade ?? '-'
+  const cliente = orc?.clientenome ?? '-'
+  const clientecpf = orc?.clientecpf ?? '-'
+  const data = orc?.datacriacao
+    ? new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // formato 24h
+      }).format(new Date(orc.datacriacao))
+    : '-'
+
+  const validade = orc?.validade
+    ? new Intl.DateTimeFormat('pt-BR').format(new Date(orc.validade))
+    : '-'
   const status = orc?.status ?? '-'
   const itens = Array.isArray(orc?.itens)
     ? orc.itens
         .map((i) => {
-          const desc = (i.descricao ?? '').padEnd(15).slice(0, 15)
+          const desc = (i.descricao ?? '').padEnd(15).slice(0, 12)
           const qtd = String(i.quantidade ?? 0).padStart(3)
           const total = Number(i.total ?? 0).toFixed(2)
-          return `${desc.padEnd(15)} ${String(qtd).padStart(3)}  R$ ${String(total).padStart(8)}`
+          return `${desc.padEnd(12)} ${String(qtd).padStart(3)}  R$ ${String(total).padStart(8)}`
         })
         .join('\n')
     : 'Nenhum item'
@@ -55,7 +67,7 @@ CPF Nº  : ${clientecpf}
 CADASTRO: ${data}
 VALIDADE: ${validade}
 ================================
-ITEM             QTD    TOTAL
+ITEM          QTD        TOTAL
 ================================
 ${itens}
 ________________________________
