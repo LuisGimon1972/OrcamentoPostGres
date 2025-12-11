@@ -469,6 +469,76 @@ app.get('/orcamentos-detalhe/:id', async (req, res) => {
   }
 })
 
+// Backend Postgres
+// Rota para buscar orçamentos por período
+app.get('/orcamentos/fecha/periodo', async (req, res) => {
+  const { inicio, fim } = req.query
+
+  // Validação básica
+  if (!inicio || !fim) {
+    return res.status(400).json({
+      error: 'Informe os parâmetros ?inicio=YYYY-MM-DD&fim=YYYY-MM-DD',
+    })
+  }
+
+  // Verifica se as datas estão no formato correto (YYYY-MM-DD)
+  const regexData = /^\d{4}-\d{2}-\d{2}$/
+  if (!regexData.test(inicio) || !regexData.test(fim)) {
+    return res.status(400).json({
+      error: 'Formato de data inválido. Use YYYY-MM-DD',
+    })
+  }
+
+  try {
+    const query = `
+      SELECT
+        o.id,
+        o.numero,
+        o.clienteid,
+        o.datacriacao,
+        o.validade,
+        o.valortotal,
+        o.status,
+        c.nome AS clientenome
+      FROM orcamentos o
+      LEFT JOIN clientes c ON c.id = o.clienteid
+      WHERE o.datacriacao::date BETWEEN $1::date AND $2::date
+      ORDER BY o.datacriacao DESC
+    `
+
+    const { rows } = await pool.query(query, [inicio, fim])
+
+    res.json(rows)
+  } catch (err) {
+    console.error('Erro na rota /orcamentos/periodo:', err)
+    res.status(500).json({ error: 'Erro interno do servidor', details: err.message })
+  }
+})
+
+app.get('/orcamentos/status/:status', async (req, res) => {
+  const { status } = req.params
+
+  const sql = `
+    SELECT
+      o.*,
+      c.nome AS clienteNome
+    FROM orcamentos o
+    LEFT JOIN clientes c ON c.id = o.clienteId
+    WHERE o.status = $1
+    ORDER BY c.nome ASC
+  `
+
+  try {
+    const result = await pool.query(sql, [status])
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({
+      error: 'Erro ao buscar orçamentos por status',
+      details: err.message,
+    })
+  }
+})
+
 // Atualizar item de orçamento
 app.put('/itensOrcamento/:itemId', async (req, res) => {
   const { itemId } = req.params

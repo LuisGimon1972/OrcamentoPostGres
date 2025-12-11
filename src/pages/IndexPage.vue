@@ -1142,10 +1142,13 @@ function limparFormulario() {
 
 watch(
   () => [item.value.precocusto, item.value.perlucro],
-  ([custo, lucro = 100]) => {
-    if (!isNaN(custo) && !isNaN(lucro)) {
-      item.value.precovenda = parseFloat((custo + (custo * lucro) / 100).toFixed(2))
-    }
+  ([custo, lucro]) => {
+    const c = Number(custo) || 0
+    const l = Number(lucro) || 0
+
+    const venda = c + (c * l) / 100
+
+    item.value.precovenda = Number(venda.toFixed(2))
   },
 )
 
@@ -1599,9 +1602,9 @@ const colunasOrcamentosg = [
   { name: 'numero', label: 'Número', field: 'numero', align: 'left' },
   { name: 'cliente', label: 'Cliente', field: 'clientenome', align: 'left' },
   {
-    name: 'dataCriacao',
+    name: 'datacriacao',
     label: 'Data',
-    field: 'dataCriacao',
+    field: 'datacriacao',
     align: 'left',
     format: (val) => {
       if (!val) return ''
