@@ -676,6 +676,41 @@ app.delete('/itensOrcamento/:itemId', async (req, res) => {
   }
 })
 
+app.delete('/orcamentos/:id', async (req, res) => {
+  const client = await pool.connect()
+  const { id } = req.params
+
+  try {
+    await client.query('BEGIN')
+
+    // 1️⃣ Verifica se o orçamento existe
+    const { rowCount } = await client.query('SELECT id FROM orcamentos WHERE id = $1', [id])
+    if (rowCount === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ success: false, error: 'Orçamento não encontrado' })
+    }
+
+    // 2️⃣ Deleta itens associados (itensorcamento)
+    await client.query('DELETE FROM itensorcamento WHERE orcamentoid = $1', [id])
+
+    // 3️⃣ Deleta o orçamento
+    const result = await client.query('DELETE FROM orcamentos WHERE id = $1', [id])
+
+    await client.query('COMMIT')
+
+    res.json({
+      success: true,
+      deleted: result.rowCount,
+    })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    console.error('ERRO DELETE /orcamentos/:id', err)
+    res.status(500).json({ success: false, error: err.message })
+  } finally {
+    client.release()
+  }
+})
+
 // ==========================================
 //  INICIAR SERVIDOR
 // ==========================================
