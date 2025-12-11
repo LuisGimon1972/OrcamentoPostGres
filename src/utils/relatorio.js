@@ -139,7 +139,7 @@ export async function gerarRelatorioGeral() {
         <tr>
           <td>${o.id}</td>
           <td>${o.numero}</td>
-          <td>${o.clienteNome || '-'}</td>
+          <td>${o.clientenome || '-'}</td>
           <td>${formatarDataHoraBR(o.datacriacao)}</td>
           <td>${o.validade}</td>
           <td style="text-align: right;">R$ ${Number(o.valorTotal).toFixed(2)}</td>
@@ -237,7 +237,7 @@ export async function gerarRelatorioStatus(status) {
         <tr>
           <td>${o.id}</td>
           <td>${o.numero}</td>
-          <td>${o.clienteNome || '-'}</td>
+          <td>${o.clientenome || '-'}</td>
           <td>${dataBR}</td>
           <td>${o.validade}</td>
           <td class="right">R$ ${Number(o.valorTotal).toFixed(2)}</td>

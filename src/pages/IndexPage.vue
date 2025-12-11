@@ -1518,7 +1518,6 @@ async function salvarOrcamento() {
   try {
     let res
     if (idOrcamentoEdicao.value) {
-      alert('ooooooooooooooo')
       console.log('Atualizando orçamento ID:', idOrcamentoEdicao.value)
       res = await axios.put(`/orcamentos/${idOrcamentoEdicao.value}`, payload)
       showToastv('Orçamento atualizado com sucesso!', 1000)
@@ -1751,7 +1750,6 @@ const verOrcamento = async (row) => {
   listarOrcamento.value = false
   idOrcamentoEdicao.value = row.id
   clienteSelecionado.value = row.clienteid
-  alert(row.clienteid)
   validade.value = row.validade
   observacao.value = row.observacoes || ''
   condicao.value = row.condicao || ''
