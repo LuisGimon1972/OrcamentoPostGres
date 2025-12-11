@@ -278,8 +278,8 @@ app.post('/orcamentos', async (req, res) => {
     itens,
     desconto,
     acrescimo,
-    valorTotalItens,
-    valorTotal,
+    valortotalitens,
+    valortotal,
     validade,
     observacoes,
     condicao,
@@ -310,8 +310,8 @@ app.post('/orcamentos', async (req, res) => {
         condicao || null,
         desconto || 0,
         acrescimo || 0,
-        valorTotalItens || 0,
-        valorTotal || 0,
+        valortotalitens || 0,
+        valortotal || 0,
         status || null,
       ],
     )
@@ -542,7 +542,7 @@ app.get('/orcamentos/status/:status', async (req, res) => {
 // Atualizar item de orçamento
 app.put('/itensOrcamento/:itemId', async (req, res) => {
   const { itemId } = req.params
-  const { descricao, quantidade, valorunit, tipoItem } = req.body
+  const { descricao, quantidade, valorunit, tipoitem } = req.body
   const total = quantidade * valorunit
 
   try {
@@ -550,7 +550,7 @@ app.put('/itensOrcamento/:itemId', async (req, res) => {
       `UPDATE itensOrcamento
        SET descricao=$1, quantidade=$2, valorUnit=$3, total=$4, tipoItem=$5
        WHERE id=$6`,
-      [descricao, quantidade, valorunit, total, tipoItem, itemId],
+      [descricao, quantidade, valorunit, total, tipoitem, itemId],
     )
     res.json({ updated: result.rowCount })
   } catch (err) {
@@ -562,25 +562,35 @@ app.put('/orcamentos/:id', async (req, res) => {
   const client = await pool.connect()
   const orcamentoId = req.params.id
 
-  const { clienteId, itens, desconto, acrescimo, validade, observacoes, condicao, status } =
-    req.body
+  const {
+    clienteId,
+    itens = [],
+    desconto = 0,
+    acrescimo = 0,
+    validade,
+    observacoes,
+    condicao,
+    status = 'ABERTO',
+  } = req.body
+
+  console.log('🔍 Itens recebidos:', itens)
 
   try {
-    // Recalcular totais
+    // 1️⃣ Recalcular totais
     let somaItens = 0
-
     itens.forEach((item) => {
-      const unit = Number(item.precoUnit || item.valorUnit || 0)
-      const qt = Number(item.quantidade)
+      const unit = Number(item.precounit || item.valorunit || 0)
+      const qt = Number(item.quantidade || 0)
       somaItens += qt * unit
     })
 
-    const valorTotalFinal = somaItens - (Number(desconto) || 0) + (Number(acrescimo) || 0)
+    const valorTotalFinal = somaItens - Number(desconto) + Number(acrescimo)
 
+    // 2️⃣ Iniciar transação
     await client.query('BEGIN')
 
-    // Atualizar orçamento
-    const sqlUpdate = `
+    // 3️⃣ Atualizar orçamento
+    const updateOrcamentoQuery = `
       UPDATE orcamentos
       SET clienteId = $1,
           validade = $2,
@@ -588,63 +598,67 @@ app.put('/orcamentos/:id', async (req, res) => {
           condicao = $4,
           desconto = $5,
           acrescimo = $6,
-          valorTotalItens = $7,
-          valorTotal = $8,
+          valortotalitens = $7,
+          valortotal = $8,
           status = $9
       WHERE id = $10
     `
 
-    await client.query(sqlUpdate, [
+    await client.query(updateOrcamentoQuery, [
       clienteId,
       validade || null,
       observacoes || null,
       condicao || null,
-      desconto || 0,
-      acrescimo || 0,
+      Number(desconto),
+      Number(acrescimo),
       somaItens,
       valorTotalFinal,
       status,
       orcamentoId,
     ])
 
-    // Apagar itens antigos
+    // 4️⃣ Remover itens antigos
     await client.query(`DELETE FROM itensorcamento WHERE orcamentoid = $1`, [orcamentoId])
 
-    // Inserir novos itens
-    const sqlItem = `
+    // 5️⃣ Inserir novos itens
+    const insertItemQuery = `
       INSERT INTO itensorcamento
-      (orcamentoId, produtoId, descricao, quantidade, valorUnit, total, tipoItem)
+      (orcamentoid, produtoid, descricao, quantidade, valorunit, total, tipoitem)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
     `
 
     for (const item of itens) {
-      const unit = Number(item.precoUnit || item.valorUnit || 0)
-      const qt = Number(item.quantidade)
+      const produtoId = Number(item.produtoid) || null
+      const unit = Number(item.precounit || item.valorunit || 0)
+      const qt = Number(item.quantidade || 0)
       const total = qt * unit
 
-      await client.query(sqlItem, [
+      console.log('➡️ Salvando item: produtoid =', produtoId)
+
+      await client.query(insertItemQuery, [
         orcamentoId,
-        item.controle || null,
+        produtoId, // CORRETO AGORA
         item.nome || item.descricao || '',
         qt,
         unit,
         total,
-        item.tipoItem || 'PRODUTO',
+        item.tipoitem || 'PRODUTO',
       ])
     }
 
+    // 6️⃣ Commit da transação
     await client.query('COMMIT')
 
     res.json({
       sucesso: true,
       mensagem: 'Orçamento atualizado com sucesso',
       orcamentoId,
-      valorTotalFinal,
       somaItens,
+      valorTotalFinal,
     })
   } catch (err) {
     await client.query('ROLLBACK')
-    console.error('ERRO PUT /orcamentos:', err)
+    console.error('❌ ERRO PUT /orcamentos/:id', err)
     res.status(500).json({ error: err.message })
   } finally {
     client.release()
