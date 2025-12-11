@@ -44,14 +44,14 @@ CREATE TABLE IF NOT EXISTS itensOrcamento (
 CREATE TABLE IF NOT EXISTS orcamentos (
     id SERIAL PRIMARY KEY,
     numero TEXT UNIQUE,
-    clienteId INTEGER,
-    dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    clienteid INTEGER,
+    datacriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     validade TEXT,
     observacoes TEXT,
     desconto REAL DEFAULT 0,
     acrescimo REAL DEFAULT 0,
-    valorTotalItens REAL DEFAULT 0,
-    valorTotal REAL DEFAULT 0,
+    valortotalitens REAL DEFAULT 0,
+    valortotal REAL DEFAULT 0,
     status TEXT DEFAULT 'ABERTO',
     condicao TEXT,
     FOREIGN KEY (clienteId) REFERENCES clientes(id)

@@ -1,12 +1,27 @@
 export async function gerarRelatorioPeriodo(inicio, fim) {
   try {
-    const url = `http://localhost:3000/orcamentos/periodo?inicio=${inicio}&fim=${fim}`
-    const res = await fetch(url)
-    const dados = await res.json()
-
-    if (!dados.length) {
+    // Valida datas antes de enviar para a API
+    const regexData = /^\d{4}-\d{2}-\d{2}$/
+    if (!regexData.test(inicio) || !regexData.test(fim)) {
+      console.warn('Datas inválidas:', inicio, fim)
       return false
     }
+
+    const url = `http://localhost:3000/orcamentos/fecha/periodo?inicio=${inicio}&fim=${fim}`
+    const res = await fetch(url)
+
+    if (!res.ok) {
+      console.error('Erro na API:', res.status, res.statusText)
+      return false
+    }
+
+    const dados = await res.json()
+
+    if (!Array.isArray(dados) || dados.length === 0) {
+      console.info('Nenhum orçamento encontrado no período.')
+      return false
+    }
+
     let conteudo = `
       <html>
       <head>
@@ -20,10 +35,8 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
         </style>
       </head>
       <body>
-
         <h1>Relatório de Orçamentos por Período</h1>
         <p><b>Período:</b> ${formatarDataBR(inicio)} até ${formatarDataBR(fim)}</p>
-
         <table>
           <tr>
             <th>ID</th>
@@ -41,10 +54,10 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
         <tr>
           <td>${o.id}</td>
           <td>${o.numero}</td>
-          <td>${o.clienteNome || '-'}</td>
-          <td>${formatarDataHoraBR(o.dataCriacao)}</td>
-          <td>${o.validade}</td>
-          <td style="text-align: right;">R$ ${Number(o.valorTotal).toFixed(2)}</td>
+          <td>${o.clientenome || '-'}</td>
+          <td>${formatarDataHoraBR(o.datacriacao)}</td>
+          <td>${o.validade || '-'}</td>
+          <td style="text-align: right;">R$ ${Number(o.valortotal).toFixed(2)}</td>
           <td>${o.status}</td>
         </tr>
       `
@@ -52,12 +65,11 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
 
     conteudo += `
         </table>
-
       </body>
       </html>
     `
 
-    // 👉 Criar iframe invisível
+    // Criar iframe invisível para impressão
     const iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
     iframe.style.right = '0'
@@ -65,7 +77,6 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
     iframe.style.width = '0'
     iframe.style.height = '0'
     iframe.style.border = '0'
-
     document.body.appendChild(iframe)
 
     const doc = iframe.contentWindow.document
@@ -73,14 +84,12 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
     doc.write(conteudo)
     doc.close()
 
-    // 👉 Delay curto para carregar conteúdo e imprimir
     setTimeout(() => {
       iframe.contentWindow.focus()
       iframe.contentWindow.print()
-
-      // remove iframe após imprimir
       setTimeout(() => iframe.remove(), 500)
     }, 300)
+
     return true
   } catch (err) {
     console.error('Erro ao gerar relatório:', err)
@@ -131,7 +140,7 @@ export async function gerarRelatorioGeral() {
           <td>${o.id}</td>
           <td>${o.numero}</td>
           <td>${o.clienteNome || '-'}</td>
-          <td>${formatarDataHoraBR(o.dataCriacao)}</td>
+          <td>${formatarDataHoraBR(o.datacriacao)}</td>
           <td>${o.validade}</td>
           <td style="text-align: right;">R$ ${Number(o.valorTotal).toFixed(2)}</td>
           <td>${o.status}</td>
@@ -221,7 +230,7 @@ export async function gerarRelatorioStatus(status) {
     `
 
     dados.forEach((o) => {
-      const [ano, mes, dia] = o.dataCriacao.split('-')
+      const [ano, mes, dia] = o.datacriacao.split('-')
       const dataBR = `${dia}/${mes}/${ano}`
 
       conteudo += `
