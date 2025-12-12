@@ -1143,7 +1143,7 @@ function limparFormulario() {
 }
 
 watch(
-  () => [item.value.precocusto, item.value.perlucro],
+  () => [item.value.precocusto, (item.value.perlucro = 100)],
   ([custo, lucro]) => {
     const c = Number(custo) || 0
     const l = Number(lucro) || 0
