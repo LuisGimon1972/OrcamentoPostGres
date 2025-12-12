@@ -43,7 +43,7 @@ export function gerarTextoCupom(orc) {
     : 'Nenhum item'
 
   const largura = 17
-  const subtotal = Number(orc?.valorTotalItens ?? 0)
+  const subtotal = Number(orc?.valortotalitens ?? 0)
     .toFixed(2)
     .padStart(largura)
   const desconto = Number(orc?.desconto ?? 0)
@@ -52,7 +52,7 @@ export function gerarTextoCupom(orc) {
   const acrescimo = Number(orc?.acrescimo ?? 0)
     .toFixed(2)
     .padStart(largura)
-  const total = Number(orc?.valorTotal ?? 0)
+  const total = Number(orc?.valortotal ?? 0)
     .toFixed(2)
     .padStart(largura)
   return `

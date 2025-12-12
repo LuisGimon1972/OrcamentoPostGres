@@ -1754,11 +1754,11 @@ const verOrcamento = async (row) => {
   idOrcamentoEdicao.value = row.id
   clienteSelecionado.value = row.clienteid
   validade.value = formatarDataBR(row.validade)
+  item.value.status = row.status || 'ABERTO'
   observacao.value = row.observacoes || ''
   condicao.value = row.condicao || ''
   desconto.value = row.desconto.toFixed(2) || 0
   acrescimo.value = row.acrescimo.toFixed(2) || 0
-  item.value.status = row.status || 'ABERTO'
   await carregarItensDoOrcamento(row.id)
   atualizarTotais()
   desabilitarTudo.value = true
