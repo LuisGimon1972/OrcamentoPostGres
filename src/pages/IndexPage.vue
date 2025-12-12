@@ -1309,9 +1309,9 @@ const colunasOrcamento = [
     headerStyle: 'text-align: left',
   },
   {
-    name: 'valorUnit',
+    name: 'valorunit',
     label: 'Valor Unit.',
-    field: 'valorUnit',
+    field: 'valorunit',
     align: 'right',
     style: 'width: 120px; text-align: right',
     headerStyle: 'text-align: right',
@@ -1425,7 +1425,7 @@ function adicionarItem(item) {
     controle: item.controle,
     nome: item.nome,
     quantidade: 1,
-    valorUnit: item.precovenda,
+    valorunit: item.precovenda,
     total: item.precovenda,
   })
 
@@ -1446,7 +1446,7 @@ function excluirItemOrç(controle) {
 function atualizarTotais() {
   // debugger
   let subtotal = itensOrcamento.value.reduce((acc, i) => {
-    i.total = i.quantidade * i.valorUnit
+    i.total = i.quantidade * i.valorunit
     return acc + i.total
   }, 0)
 
@@ -1771,7 +1771,7 @@ async function carregarItensDoOrcamento(id) {
     produtoId: item.produtoId,
     nome: item.descricao,
     quantidade: item.quantidade,
-    valorUnit: item.valorunit,
+    valorunit: item.valorunit,
     total: item.total,
   }))
 }
