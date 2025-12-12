@@ -1,0 +1,140 @@
+1) Instalar pg
+npm install pg
+
+2) Criar conexão
+const { Pool } = require('pg')
+const pool = new Pool({
+  host: 'localhost',
+  user: 'postgres',
+  password: 'sua_senha',
+  database: 'banco',
+  port: 5432
+})
+
+Para abrir e usar um banco PostgreSQL no seu backend Node.js, você vai precisar de apenas 3 coisas:
+
+✅ 1. Instalar o PostgreSQL no seu computador
+
+Windows
+
+Instalar o pacote oficial:
+🔹 PostgreSQL Installer (com pgAdmin)
+Inclui: PostgreSQL + pgAdmin + ferramentas de linha de comando.
+
+Durante a instalação você escolhe:
+
+Porta (padrão: 5432)
+
+Usuário: postgres
+
+Senha: você define
+
+Banco inicial: postgres
+
+✅ 2. Criar o banco onde suas tabelas ficarão
+
+Depois de instalado, abra o pgAdmin e crie um banco:
+Exemplo:
+sistema_vendas
+
+✅ 3. Instalar o driver no Node.js
+
+No seu projeto, instale:
+npm install pg
+
+
+❗ Se NÃO existir o serviço:
+
+👉 significa que O PostgreSQL não está instalado no seu PC.
+
+Você precisa instalar aqui:
+
+https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+
+Baixe o instalador do Windows.
+*******************
+Se você já tem um arquivo banco.sql, isso significa que você pode importar tudo de uma vez no PostgreSQL — tabelas, inserts, estrutura, etc.
+✅ 1. Abra o psql
+
+No CMD / PowerShell:
+
+psql -U postgres
+Senha: 8451
+
+✅ 2. Criar o banco "banco" (se ainda não existir)
+CREATE DATABASE banco;
+
+✅ 3. Conectar ao banco
+\c banco
+
+✅ 4. Importar o arquivo banco.sql
+
+Agora execute:
+
+\i D:/Contrato/Controle/banco.sql
+
+***************************************************
+No banco fica na paste contrato/controle/backend
+
+✅ 1. Via terminal (mais simples)
+
+Abra o terminal dentro da pasta onde está o arquivo:
+
+cd contrato/controle/backend
+
+
+Rode o comando:
+
+psql -U postgres -d banco -f banco.sql
+
+Se a senha do PostgreSQL for 8451, ele vai pedir para digitar.
+
+✅ 2. Especificar caminho absoluto
+
+Se quiser usar o caminho completo:
+
+psql -U postgres -d banco -f "D:/contrato/controle/backend/banco.sql"
+
+******
+📌 COMO RODAR
+
+Abra o terminal:
+
+cd D:\Contrato\Controle\backend
+
+
+Execute:
+
+node server.cjs
+
+📌 O que fazer se aparecer erro "database does not exist"?
+
+Você precisa criar o banco chamado banco no PostgreSQL:
+
+createdb banco
+
+
+Ou com psql:
+
+psql -U postgres -c "CREATE DATABASE banco;"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
