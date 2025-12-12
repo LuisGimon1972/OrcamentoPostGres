@@ -318,23 +318,19 @@ app.post('/orcamentos', async (req, res) => {
     const orcamentoId = orcamentoResult.rows[0].id
 
     for (const item of itens) {
-      const produtoId = Number(item.produtoid || item.controle) || null
       const unit = Number(item.valorunit || 0)
-      const qt = Number(item.quantidade || 0)
-      const total = qt * unit
-
+      const total = Number(item.total || unit * item.quantidade)
       await client.query(
-        `INSERT INTO itensOrcamento
-     (orcamentoid, produtoid, descricao, quantidade, valorunit, total, tipoitem)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        `INSERT INTO itensOrcamento (orcamentoId, produtoId, descricao, quantidade, valorunit, total, tipoItem)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
         [
-          orcamentoId, // $1
-          produtoId, // $2  (código/controle do produto)
-          item.nome || item.descricao || '', // $3
-          qt, // $4
-          unit, // $5
-          total, // $6
-          item.tipoitem || 'PRODUTO', // $7
+          orcamentoId,
+          item.controle || null,
+          item.nome || item.descricao || '',
+          item.quantidade,
+          unit,
+          total,
+          item.tipoItem || 'PRODUTO',
         ],
       )
     }
