@@ -1422,7 +1422,7 @@ function adicionarItem(item) {
   if (!item) return
 
   itensOrcamento.value.push({
-    controle: item.controle,
+    produtoid: item.controle,
     nome: item.nome,
     quantidade: 1,
     valorunit: item.precovenda,
@@ -1768,7 +1768,7 @@ async function carregarItensDoOrcamento(id) {
 
   itensOrcamento.value = dados.itens.map((item) => ({
     controle: item.id,
-    produtoId: item.produtoId,
+    produtoid: item.produtoid,
     nome: item.descricao,
     quantidade: item.quantidade,
     valorunit: item.valorunit,
