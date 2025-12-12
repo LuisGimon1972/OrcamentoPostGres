@@ -1,6 +1,5 @@
 export async function gerarRelatorioPeriodo(inicio, fim) {
   try {
-    // Valida datas antes de enviar para a API
     const regexData = /^\d{4}-\d{2}-\d{2}$/
     if (!regexData.test(inicio) || !regexData.test(fim)) {
       console.warn('Datas inválidas:', inicio, fim)
@@ -56,7 +55,7 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
           <td>${o.numero}</td>
           <td>${o.clientenome || '-'}</td>
           <td>${formatarDataHoraBR(o.datacriacao)}</td>
-          <td>${o.validade || '-'}</td>
+          <td>${formatarDataBR(o.validade)}</td>
           <td style="text-align: right;">R$ ${Number(o.valortotal).toFixed(2)}</td>
           <td>${o.status}</td>
         </tr>
@@ -68,7 +67,6 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
       </body>
       </html>
     `
-
     // Criar iframe invisível para impressão
     const iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
@@ -141,8 +139,8 @@ export async function gerarRelatorioGeral() {
           <td>${o.numero}</td>
           <td>${o.clientenome || '-'}</td>
           <td>${formatarDataHoraBR(o.datacriacao)}</td>
-          <td>${o.validade}</td>
-          <td style="text-align: right;">R$ ${Number(o.valorTotal).toFixed(2)}</td>
+          <td>${formatarDataBR(o.validade)}</td>
+          <td style="text-align: right;">R$ ${Number(o.valortotal).toFixed(2)}</td>
           <td>${o.status}</td>
         </tr>
       `
@@ -170,13 +168,9 @@ export async function gerarRelatorioGeral() {
     doc.open()
     doc.write(conteudo)
     doc.close()
-
-    // 👉 Delay curto para carregar conteúdo e imprimir
     setTimeout(() => {
       iframe.contentWindow.focus()
       iframe.contentWindow.print()
-
-      // remove iframe após imprimir
       setTimeout(() => iframe.remove(), 500)
     }, 300)
     return true
@@ -191,15 +185,9 @@ export async function gerarRelatorioStatus(status) {
     const url = `http://localhost:3000/orcamentos/status/${status}`
     const res = await fetch(url)
     const dados = await res.json()
-
     if (!dados.length) {
-      alert('Nenhum orçamento com o status selecionado.')
-      return
+      return false
     }
-
-    // ------------------------------
-    // MONTAR HTML DO RELATÓRIO A4
-    // ------------------------------
     let conteudo = `
       <html>
       <head>
@@ -230,17 +218,14 @@ export async function gerarRelatorioStatus(status) {
     `
 
     dados.forEach((o) => {
-      const [ano, mes, dia] = o.datacriacao.split('-')
-      const dataBR = `${dia}/${mes}/${ano}`
-
       conteudo += `
         <tr>
           <td>${o.id}</td>
           <td>${o.numero}</td>
           <td>${o.clientenome || '-'}</td>
-          <td>${dataBR}</td>
-          <td>${o.validade}</td>
-          <td class="right">R$ ${Number(o.valorTotal).toFixed(2)}</td>
+          <td>${formatarDataHoraBR(o.datacriacao)}</td>
+          <td>${formatarDataBR(o.validade)}</td>
+          <td class="right">R$ ${Number(o.valortotal).toFixed(2)}</td>
         </tr>
       `
     })
@@ -251,11 +236,6 @@ export async function gerarRelatorioStatus(status) {
       </body>
       </html>
     `
-
-    // ------------------------------
-    // IMPRIMIR VIA IFRAME INVISÍVEL
-    // ------------------------------
-
     const iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
     iframe.style.width = '0'
@@ -271,17 +251,16 @@ export async function gerarRelatorioStatus(status) {
     doc.write(conteudo)
     doc.close()
 
-    // Delay mínimo para o iframe carregar
     setTimeout(() => {
       iframe.contentWindow.focus()
       iframe.contentWindow.print()
-
-      // Remove iframe
       setTimeout(() => iframe.remove(), 500)
     }, 300)
+
+    return true
   } catch (err) {
     console.error(err)
-    alert('Erro ao gerar relatório por status.')
+    return false
   }
 }
 
@@ -295,10 +274,8 @@ function formatarDataHoraBR(valor) {
   const dia = String(data.getDate()).padStart(2, '0')
   const mes = String(data.getMonth() + 1).padStart(2, '0')
   const ano = data.getFullYear()
-
   const hora = String(data.getHours()).padStart(2, '0')
   const min = String(data.getMinutes()).padStart(2, '0')
-
   return `${dia}/${mes}/${ano} ${hora}:${min}`
 }
 

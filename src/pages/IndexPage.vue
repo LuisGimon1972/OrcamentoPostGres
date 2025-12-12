@@ -1045,7 +1045,9 @@ const buscarCep = async (val) => {
       cepcerto.value = false
       return
     }
-    //cliente.value.endereco = res.data.logradouro || ''  //cliente.value.cidade = res.data.localidade || ''  //cliente.value.estado = res.data.uf || ''
+    //cliente.value.endereco = res.data.logradouro || ''
+    //cliente.value.cidade = res.data.localidade || ''
+    //cliente.value.estado = res.data.uf || ''
     cliente.value.bairro = res.data.bairro.toUpperCase() || ''
     cliente.value.endereco = res.data.logradouro.toUpperCase() || ''
     cepcerto.value = true
@@ -1183,7 +1185,7 @@ async function salvarItem() {
     return
   }
 
-  /*const resCheck = await fetch(`${API_URL}/itens/buscar-codigo/${item.value.codbarras}`)
+  const resCheck = await fetch(`${API_URL}/itens/buscar-codigo/${item.value.codbarras}`)
   const itemExistente = await resCheck.json()
 
   if (!item.value.controle && itemExistente) {
@@ -1194,7 +1196,7 @@ async function salvarItem() {
   if (item.value.controle && itemExistente && itemExistente.controle !== item.value.controle) {
     showToast('Código de barras já está sendo usado em outro item!', 1500)
     return codInput.value?.focus()
-  }*/
+  }
 
   if (!item.value.controle) {
     const res = await fetch(`${API_URL}/itens`, {
@@ -1277,6 +1279,7 @@ function limparFormularioI() {
 const criarOrcamento = ref(false)
 const entrarOrcamento = ref(false)
 const clienteSelecionado = ref(null)
+const desabilitarTudo = ref(false)
 const cpfCliente = ref('')
 const endCliente = ref('')
 const endCep = ref('')
@@ -1868,8 +1871,8 @@ const abrirRelatorioStatus = () => {
   $q.dialog({
     title: 'Relatório por Status',
     message: 'Selecione o status:',
-    cancel: true, // 👉 adiciona botão Cancelar/Fechar
-    persistent: false, // (opcional) deixa fechar clicando fora
+    cancel: true,
+    persistent: false,
     options: {
       type: 'radio',
       model: 'ABERTO',
@@ -1880,27 +1883,20 @@ const abrirRelatorioStatus = () => {
       ],
     },
   })
-    .onOk((status) => {
-      gerarRelatorioStatus(status)
+    .onOk(async (status) => {
+      const ok = await gerarRelatorioStatus(status)
+      if (!ok) {
+        $q.notify({
+          type: 'warning',
+          message: `Nenhum orçamento encontrado para o status "${status}"!`,
+        })
+        return
+      }
     })
     .onCancel(() => {
       console.log('Fechado')
     })
 }
-
-//const router = useRouter()
-
-/*function imprimirOrcamento(row) {
-  if (!row?.id) {
-    showToast('ID do orçamento não encontrado!', 1500)
-    console.error('ID do orçamento não encontrado:', row)
-    return
-  }
-
-  router.push(`/imprimir-orcamento/${row.id}`)
-}*/
-
-const desabilitarTudo = ref(false)
 
 function showToast(message, tempo = 3000) {
   const toast = document.getElementById('toast')
