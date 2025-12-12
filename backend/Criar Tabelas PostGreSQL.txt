@@ -1,0 +1,143 @@
+async function criarTabelas() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS clientes (
+      id SERIAL PRIMARY KEY,
+      cpf TEXT, 
+      nome TEXT, 
+      fantasia TEXT, 
+      cep TEXT, 
+      bairro TEXT,
+      endereco TEXT, 
+      email TEXT,
+      telefone TEXT, 
+      celular TEXT, 
+      limite NUMERIC(10,2)
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS itens (
+      controle SERIAL PRIMARY KEY,
+      codbarras TEXT, 
+      nome TEXT, 
+      descricao TEXT,
+      grupo TEXT, 
+      marca TEXT,
+      quantidade NUMERIC(10,2), 
+      precocusto NUMERIC(10,2), 
+      perlucro NUMERIC(10,2),
+      precovenda NUMERIC(10,2), 
+      revenda NUMERIC(10,2)
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS objetosVeiculos (
+      id SERIAL PRIMARY KEY,
+      clienteId INTEGER REFERENCES clientes(id),
+      tipo TEXT NOT NULL,
+      marca TEXT,
+      modelo TEXT,
+      ano TEXT,
+      cor TEXT,
+      placaSerie TEXT,
+      numeroSerie TEXT,
+      status TEXT DEFAULT 'ATIVO',
+      observacoes TEXT,
+      ativo TEXT DEFAULT 'SIM',
+      dataCadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ordemServico (
+      id SERIAL PRIMARY KEY,
+      numeroOS TEXT UNIQUE,
+      clienteId INTEGER NOT NULL REFERENCES clientes(id),
+      objetoVeiculoId INTEGER REFERENCES objetosVeiculos(id),
+      funcionarioId INTEGER,
+      laudo TEXT,
+      dataAbertura TIMESTAMP NOT NULL,
+      dataFinalizacao TIMESTAMP,
+      status TEXT DEFAULT 'ABERTA',
+      descricao TEXT,
+      observacoes TEXT,
+      garantia TEXT,
+      desconto NUMERIC(10,2) DEFAULT 0,
+      acrescimo NUMERIC(10,2) DEFAULT 0,
+      valorTotalItem NUMERIC(10,2) DEFAULT 0,
+      valorTotalServ NUMERIC(10,2) DEFAULT 0,
+      valorTotal NUMERIC(10,2) DEFAULT 0,
+      formaPagamento TEXT,
+      dataCadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      adiantamento NUMERIC(10,2) DEFAULT 0
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS itensOrdemServico (
+      id SERIAL PRIMARY KEY,
+      ordemServicoId INTEGER REFERENCES ordemServico(id),
+      produtoId INTEGER REFERENCES itens(controle),
+      descricao TEXT,
+      tipoItem TEXT DEFAULT 'PRODUTO',
+      quantidade NUMERIC(10,2),
+      valorUnitario NUMERIC(10,2),
+      total NUMERIC(10,2),
+      tecnico TEXT
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS receber (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER REFERENCES clientes(id),
+      descricao TEXT,
+      valororiginal NUMERIC(10,2),
+      valor NUMERIC(10,2),
+      valorpago NUMERIC(10,2),
+      valorpendente NUMERIC(10,2),
+      datavencimento TEXT,
+      datapagamento TEXT,
+      datacadastro TEXT,
+      status TEXT,
+      formapagamento TEXT,
+      observacao TEXT,
+      usuario TEXT,
+      referencia TEXT,
+      numero_documento TEXT,
+      juros NUMERIC(10,2),
+      desconto NUMERIC(10,2)
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS orcamentos (
+      id SERIAL PRIMARY KEY,
+      numero TEXT UNIQUE,
+      clienteId INTEGER REFERENCES clientes(id),
+      dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      validade TEXT,
+      observacoes TEXT,
+      condicao TEXT,
+      desconto NUMERIC(10,2) DEFAULT 0,
+      acrescimo NUMERIC(10,2) DEFAULT 0,
+      valorTotalItens NUMERIC(10,2) DEFAULT 0,
+      valorTotal NUMERIC(10,2) DEFAULT 0,
+      status TEXT DEFAULT 'ABERTO'
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS itensOrcamento (
+      id SERIAL PRIMARY KEY,
+      orcamentoId INTEGER REFERENCES orcamentos(id),
+      produtoId INTEGER REFERENCES itens(controle),
+      descricao TEXT,
+      quantidade NUMERIC(10,2),
+      valorUnit NUMERIC(10,2),
+      total NUMERIC(10,2),
+      tipoItem TEXT DEFAULT 'PRODUTO'
+    )
+  `)
+}

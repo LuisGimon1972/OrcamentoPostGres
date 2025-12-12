@@ -1733,7 +1733,7 @@ const editarOrcamento = async (row) => {
   listarOrcamento.value = false
   idOrcamentoEdicao.value = row.id
   clienteSelecionado.value = row.clienteid
-  validade.value = row.validade
+  validade.value = formatarDataBR(row.validade)
   observacao.value = row.observacoes || ''
   condicao.value = row.condicao || ''
   desconto.value = row.desconto || 0
@@ -1753,7 +1753,7 @@ const verOrcamento = async (row) => {
   listarOrcamento.value = false
   idOrcamentoEdicao.value = row.id
   clienteSelecionado.value = row.clienteid
-  validade.value = row.validade
+  validade.value = formatarDataBR(row.validade)
   observacao.value = row.observacoes || ''
   condicao.value = row.condicao || ''
   desconto.value = row.desconto.toFixed(2) || 0
@@ -1763,6 +1763,15 @@ const verOrcamento = async (row) => {
   atualizarTotais()
   desabilitarTudo.value = true
   entrarOrcamento.value = false
+}
+
+function formatarDataBR(dataISO) {
+  const d = new Date(dataISO)
+  const dia = String(d.getDate()).padStart(2, '0')
+  const mes = String(d.getMonth() + 1).padStart(2, '0')
+  const ano = String(d.getFullYear()).slice(0)
+
+  return `${dia}/${mes}/${ano}`
 }
 
 async function carregarItensDoOrcamento(id) {
