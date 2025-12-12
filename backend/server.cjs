@@ -285,6 +285,8 @@ app.post('/orcamentos', async (req, res) => {
     condicao,
     status,
   } = req.body
+
+  console.log('🔍 Itens recebidos Orçamento Novo:', itens)
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
@@ -577,7 +579,7 @@ app.put('/orcamentos/:id', async (req, res) => {
     status = 'ABERTO',
   } = req.body
 
-  console.log('🔍 Itens recebidos:', itens)
+  console.log('🔍 Itens recebidos Orçamento Edição::', itens)
 
   try {
     // 1️⃣ Recalcular totais
