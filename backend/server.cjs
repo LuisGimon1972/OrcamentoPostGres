@@ -318,10 +318,10 @@ app.post('/orcamentos', async (req, res) => {
     const orcamentoId = orcamentoResult.rows[0].id
 
     for (const item of itens) {
-      const unit = Number(item.precoUnit || item.valorUnit || 0)
+      const unit = Number(item.valorunit || 0)
       const total = Number(item.total || unit * item.quantidade)
       await client.query(
-        `INSERT INTO itensOrcamento (orcamentoId, produtoId, descricao, quantidade, valorUnit, total, tipoItem)
+        `INSERT INTO itensOrcamento (orcamentoId, produtoId, descricao, quantidade, valorunit, total, tipoItem)
          VALUES ($1,$2,$3,$4,$5,$6,$7)`,
         [
           orcamentoId,
@@ -548,7 +548,7 @@ app.put('/itensOrcamento/:itemId', async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE itensOrcamento
-       SET descricao=$1, quantidade=$2, valorUnit=$3, total=$4, tipoItem=$5
+       SET descricao=$1, quantidade=$2, valorunit=$3, total=$4, tipoItem=$5
        WHERE id=$6`,
       [descricao, quantidade, valorunit, total, tipoitem, itemId],
     )
