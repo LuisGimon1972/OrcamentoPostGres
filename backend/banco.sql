@@ -1,5 +1,6 @@
-BEGIN;
-
+-- =========================
+-- TABELA CLIENTES
+-- =========================
 CREATE TABLE IF NOT EXISTS clientes (
     id SERIAL PRIMARY KEY,
     cpf TEXT,
@@ -14,6 +15,9 @@ CREATE TABLE IF NOT EXISTS clientes (
     bairro TEXT
 );
 
+-- =========================
+-- TABELA ITENS (PRODUTOS)
+-- =========================
 CREATE TABLE IF NOT EXISTS itens (
     controle SERIAL PRIMARY KEY,
     codbarras TEXT,
@@ -28,19 +32,9 @@ CREATE TABLE IF NOT EXISTS itens (
     revenda REAL
 );
 
-CREATE TABLE IF NOT EXISTS itensOrcamento (
-    id SERIAL PRIMARY KEY,
-    orcamentoId INTEGER NOT NULL,
-    produtoId INTEGER,
-    descricao TEXT,
-    quantidade REAL NOT NULL,
-    valorUnit REAL NOT NULL,
-    total REAL NOT NULL,
-    tipoItem TEXT DEFAULT 'PRODUTO',
-    FOREIGN KEY (orcamentoId) REFERENCES orcamentos(id),
-    FOREIGN KEY (produtoId) REFERENCES itens(controle)
-);
-
+-- =========================
+-- TABELA ORCAMENTOS
+-- =========================
 CREATE TABLE IF NOT EXISTS orcamentos (
     id SERIAL PRIMARY KEY,
     numero TEXT UNIQUE,
@@ -54,27 +48,24 @@ CREATE TABLE IF NOT EXISTS orcamentos (
     valortotal REAL DEFAULT 0,
     status TEXT DEFAULT 'ABERTO',
     condicao TEXT,
-    FOREIGN KEY (clienteId) REFERENCES clientes(id)
+    CONSTRAINT fk_orcamento_cliente
+        FOREIGN KEY (clienteid) REFERENCES clientes(id)
 );
 
-CREATE TABLE IF NOT EXISTS receber (
+-- =========================
+-- TABELA ITENS DO ORCAMENTO
+-- =========================
+CREATE TABLE IF NOT EXISTS itensorcamento (
     id SERIAL PRIMARY KEY,
-    cliente_id INTEGER,
+    orcamentoid INTEGER NOT NULL,
+    produtoid INTEGER,
     descricao TEXT,
-    valororiginal REAL,
-    valor REAL,
-    valorpago REAL,
-    valorpendente REAL,
-    datavencimento TIMESTAMP,
-    datapagamento TIMESTAMP,
-    datacadastro TIMESTAMP,
-    status TEXT,
-    formapagamento TEXT,
-    observacao TEXT,
-    usuario TEXT,
-    referencia TEXT,
-    numero_documento TEXT,
-    juros REAL,
-    desconto REAL,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    quantidade REAL NOT NULL,
+    valorunit REAL NOT NULL,
+    total REAL NOT NULL,
+    tipoitem TEXT DEFAULT 'PRODUTO',
+    CONSTRAINT fk_item_orcamento
+        FOREIGN KEY (orcamentoid) REFERENCES orcamentos(id),
+    CONSTRAINT fk_item_produto
+        FOREIGN KEY (produtoid) REFERENCES itens(controle)
 );

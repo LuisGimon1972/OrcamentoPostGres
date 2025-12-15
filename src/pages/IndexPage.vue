@@ -1627,14 +1627,20 @@ const colunasOrcamentosg = [
     align: 'left',
     format: (val) => {
       if (!val) return ''
-      if (val.includes('-')) {
-        const partes = val.split('-')
-        if (partes[0].length === 2) {
-          return `${partes[0]}/${partes[1]}/${partes[2]}`
-        }
-        if (partes[0].length === 4) {
-          return `${partes[2]}/${partes[1]}/${partes[0]}`
-        }
+
+      // pega só a data se vier com hora
+      const data = val.split('T')[0]
+
+      const partes = data.split('-')
+
+      // yyyy-mm-dd → dd/mm/yyyy
+      if (partes[0].length === 4) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`
+      }
+
+      // dd-mm-yyyy → dd/mm/yyyy
+      if (partes[0].length === 2) {
+        return `${partes[0]}/${partes[1]}/${partes[2]}`
       }
 
       return val
