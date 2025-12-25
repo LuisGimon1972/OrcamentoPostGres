@@ -55,7 +55,7 @@ export async function gerarRelatorioPeriodo(inicio, fim) {
           <td>${o.numero}</td>
           <td>${o.clientenome || '-'}</td>
           <td>${formatarDataHoraBR(o.datacriacao)}</td>
-          <td>${formatarDataBR(o.validade)}</td>
+          <td>${o.validade}</td>
           <td style="text-align: right;">R$ ${Number(o.valortotal).toFixed(2)}</td>
           <td>${o.status}</td>
         </tr>
@@ -139,7 +139,7 @@ export async function gerarRelatorioGeral() {
           <td>${o.numero}</td>
           <td>${o.clientenome || '-'}</td>
           <td>${formatarDataHoraBR(o.datacriacao)}</td>
-          <td>${formatarDataBR(o.validade)}</td>
+          <td>${o.validade}</td>
           <td style="text-align: right;">R$ ${Number(o.valortotal).toFixed(2)}</td>
           <td>${o.status}</td>
         </tr>
@@ -224,7 +224,7 @@ export async function gerarRelatorioStatus(status) {
           <td>${o.numero}</td>
           <td>${o.clientenome || '-'}</td>
           <td>${formatarDataHoraBR(o.datacriacao)}</td>
-          <td>${formatarDataBR(o.validade)}</td>
+          <td>${o.validade}</td>
           <td class="right">R$ ${Number(o.valortotal).toFixed(2)}</td>
         </tr>
       `
