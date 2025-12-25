@@ -1771,13 +1771,16 @@ const verOrcamento = async (row) => {
   entrarOrcamento.value = false
 }
 
-function formatarDataBR(dataISO) {
-  const d = new Date(dataISO)
-  const dia = String(d.getDate()).padStart(2, '0')
-  const mes = String(d.getMonth() + 1).padStart(2, '0')
-  const ano = String(d.getFullYear()).slice(0)
+function formatarDataBR(data) {
+  if (!data) return ''
 
-  return `${dia}/${mes}/${ano}`
+  // formato DD-MM-YYYY
+  if (/^\d{2}-\d{2}-\d{4}$/.test(data)) {
+    const [dia, mes, ano] = data.split('-')
+    return `${dia}/${mes}/${ano}`
+  }
+
+  return ''
 }
 
 async function carregarItensDoOrcamento(id) {
@@ -1893,7 +1896,7 @@ const abrirRelatorioStatus = () => {
       model: 'ABERTO',
       items: [
         { label: 'Aberto', value: 'ABERTO' },
-        { label: 'Em Negociação', value: 'EM NEGOCIAÇÃO' },
+        { label: 'Em negociação', value: 'EM NEGOCIAÇÃO' },
         { label: 'Finalizado', value: 'FINALIZADO' },
       ],
     },
@@ -1912,6 +1915,7 @@ const abrirRelatorioStatus = () => {
       console.log('Fechado')
     })
 }
+
 
 function showToast(message, tempo = 3000) {
   const toast = document.getElementById('toast')

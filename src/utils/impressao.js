@@ -15,21 +15,9 @@ export async function buscarOrcamento(id) {
 export function gerarTextoCupom(orc) {
   const numero = orc?.numero ?? '-'
   const cliente = orc?.clientenome ?? '-'
-  const clientecpf = orc?.clientecpf ?? '-'
-  const data = orc?.datacriacao
-    ? new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false, // formato 24h
-      }).format(new Date(orc.datacriacao))
-    : '-'
-
+  const clientecpf = orc?.clientecpf ?? '-' 
+  const data = formatarData(orc?.datacriacao, true)
   const validade = orc?.validade
-    ? new Intl.DateTimeFormat('pt-BR').format(new Date(orc.validade))
-    : '-'
   const status = orc?.status ?? '-'
   const itens = Array.isArray(orc?.itens)
     ? orc.itens
@@ -87,4 +75,30 @@ export function imprimirTexto(texto) {
   w.document.close()
   w.print()
   w.close()
+}
+
+function formatarData(valor, comHora = false) {
+  if (!valor) return '-'
+
+  let d = new Date(valor)
+
+  // tenta converter DD/MM/YYYY ou DD/MM/YYYY HH:mm
+  if (isNaN(d.getTime()) && typeof valor === 'string') {
+    const [data, hora] = valor.split(' ')
+    const [dia, mes, ano] = data.split('/')
+    d = new Date(`${ano}-${mes}-${dia}${hora ? 'T' + hora : ''}`)
+  }
+
+  if (isNaN(d.getTime())) return '-'
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    ...(comHora && {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }),
+  }).format(d)
 }

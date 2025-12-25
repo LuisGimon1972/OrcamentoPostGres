@@ -1,0 +1,43 @@
+Passo 2 — Forçar a associação de arquivos no settings.json
+Abra o settings.json do usuário:
+
+Pressione Ctrl+Shift+P
+
+Digite Open Settings (JSON)
+
+Coloque dentro exatamente isso (se já existir, substitua ou mescle):
+
+json
+Copiar
+Editar
+{
+  "files.associations": {
+    "*.vue": "vue"
+  },
+  "volar.takeOverMode.enabled": true,
+  "editor.semanticHighlighting.enabled": true,
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": [
+          "source.vue",
+          "text.html.vue",
+          "meta.script.vue",
+          "source.ts",
+          "source.js"
+        ],
+        "settings": {
+          "foreground": "#D4D4D4"
+        }
+      }
+    ]
+  }
+}
+Salve o arquivo e reinicie o VS Code.
+
+Passo 3 — Mudar o tema do VS Code
+Tente mudar o tema para o Dark+ (padrão) para garantir que o tema atual não está removendo a cor:
+
+Ctrl+K Ctrl+T
+
+Escolha Dark+ (default dark)

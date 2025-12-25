@@ -68,4 +68,5 @@ CREATE TABLE IF NOT EXISTS itensorcamento (
         FOREIGN KEY (orcamentoid) REFERENCES orcamentos(id),
     CONSTRAINT fk_item_produto
         FOREIGN KEY (produtoid) REFERENCES itens(controle)
+
 );

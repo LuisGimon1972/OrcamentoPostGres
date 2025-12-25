@@ -1,0 +1,90 @@
+RESUMO DOS COMANDOS POSTGRESQL – CASO REAL DO PROJETO
+
+1) BACKUP DO BANCO (EXPORTAR DADOS)
+
+Comando:
+pg_dump -U postgres -d banco > banco.sql
+
+Explicação:
+Esse comando exporta todo o banco de dados chamado "banco".
+Ele cria o arquivo banco.sql contendo:
+- tabelas
+- dados
+- relacionamentos
+- sequências
+
+Esse arquivo é o backup completo do banco e deve ser guardado para:
+- trocar de computador
+- restaurar dados
+- evitar perda de informações
+
+
+2) ABRIR O POSTGRESQL (PSQL)
+
+Comando:
+"C:\Program Files\PostgreSQL\12\bin\psql.exe" -U postgres
+
+Explicação:
+Abre o terminal do PostgreSQL (psql) usando o usuário postgres.
+Você entra no banco padrão chamado postgres.
+Normalmente aparece no terminal:
+postgres=#
+
+Esse modo é usado para:
+- criar bancos
+- listar bancos
+- administrar o PostgreSQL
+
+
+3) ABRIR O BANCO DO SISTEMA
+
+Comando:
+"C:\Program Files\PostgreSQL\12\bin\psql.exe" -U postgres -d banco
+
+Explicação:
+Abre o terminal psql já conectado ao banco chamado banco.
+Tudo que for executado aqui afeta diretamente esse banco.
+No terminal aparece:
+banco=#
+
+
+4) IMPORTAR O BANCO (RESTAURAR BACKUP)
+
+Comando dentro do psql:
+\i C:/ControlePG/backend/banco.sql
+
+Explicação:
+Executa todos os comandos que estão dentro do arquivo banco.sql.
+Cria tabelas, insere dados e recria o banco exatamente como estava.
+Usado quando:
+- banco foi perdido
+- sistema foi instalado em outro PC
+
+
+5) LISTAR TABELAS DO BANCO
+
+Comando:
+\dt
+
+Explicação:
+Mostra todas as tabelas existentes no banco conectado.
+Serve para confirmar se o banco foi importado corretamente.
+
+
+RESUMO RÁPIDO:
+
+pg_dump            = exportar / backup do banco
+psql               = entrar no PostgreSQL
+-d banco            = escolher o banco do sistema
+\i banco.sql       = importar o banco
+\dt                = listar tabelas
+
+FLUXO CORRETO ENTRE PCS:
+
+PC ANTIGO:
+pg_dump -U postgres -d banco > banco.sql
+
+PC NOVO:
+psql -U postgres -d banco
+\i banco.sql
+\dt
