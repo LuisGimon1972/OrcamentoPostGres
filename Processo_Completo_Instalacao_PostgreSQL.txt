@@ -1,0 +1,150 @@
+Sempre que precisar:
+
+migrar banco
+
+organizar documentação
+
+revisar SQL
+
+preparar instalação em outro PC
+
+ou deixar o projeto mais profissional
+
+PROCESSO COMPLETO DE RESOLUÇÃO – INSTALAÇÃO E MIGRAÇÃO POSTGRESQL
+
+Este documento descreve todo o processo realizado para resolver o problema
+de instalação do projeto em outro computador, desde o zero até a recuperação
+dos dados.
+
+--------------------------------------------------
+1) SITUAÇÃO INICIAL
+--------------------------------------------------
+- Projeto Node.js funcionando corretamente no computador antigo
+- Banco de dados PostgreSQL já existia com tabelas e dados
+- Novo computador precisava rodar o mesmo projeto
+- PostgreSQL ainda não estava corretamente configurado
+- Dados antigos não apareciam no sistema
+
+--------------------------------------------------
+2) INSTALAÇÃO DO POSTGRESQL NO NOVO PC
+--------------------------------------------------
+- Foi feito o download do PostgreSQL 12
+- Após a instalação, o comando psql não funcionava no prompt
+- Solução: usar o caminho completo do executável
+
+Comando usado:
+"C:\Program Files\PostgreSQL\12\bin\psql.exe" -U postgres
+
+--------------------------------------------------
+3) ACESSO AO PSQL E VERIFICAÇÃO
+--------------------------------------------------
+- Conexão realizada com sucesso
+- Prompt exibido: postgres=#
+- Listagem dos bancos existentes usando:
+\l
+
+Resultado:
+Somente os bancos padrão existiam (postgres, template0, template1)
+
+--------------------------------------------------
+4) CRIAÇÃO / IMPORTAÇÃO DO BANCO
+--------------------------------------------------
+- Tentativa inicial de importar SQL falhou
+- Erros encontrados:
+  - tabelas fora de ordem
+  - foreign keys apontando para tabelas inexistentes
+  - nomes de colunas inconsistentes (maiúsculas/minúsculas)
+
+--------------------------------------------------
+5) REFATORAÇÃO DO SCRIPT SQL
+--------------------------------------------------
+Ações realizadas:
+- Reorganização da ordem das tabelas
+- Correção de nomes das colunas
+- Correção das foreign keys
+- Garantia de compatibilidade com PostgreSQL
+
+Ordem correta aplicada:
+1. clientes
+2. itens
+3. orcamentos
+4. itensorcamento
+
+Após isso, o comando:
+\i banco.sql
+passou a funcionar sem erros
+
+--------------------------------------------------
+6) CONFIRMAÇÃO DA ESTRUTURA
+--------------------------------------------------
+Comando usado:
+\dt
+
+Resultado:
+Todas as tabelas apareceram corretamente no banco
+
+--------------------------------------------------
+7) PROBLEMA FINAL IDENTIFICADO
+--------------------------------------------------
+- O sistema rodava
+- O banco existia
+- Mas os dados antigos não apareciam
+
+Causa:
+Os dados estavam apenas no banco do computador antigo.
+O banco novo estava vazio.
+
+--------------------------------------------------
+8) SOLUÇÃO DEFINITIVA – MIGRAÇÃO DOS DADOS
+--------------------------------------------------
+No computador antigo, foi feito o backup completo do banco:
+
+pg_dump -U postgres -d banco > banco.sql
+
+Esse arquivo contém:
+- estrutura
+- dados
+- relacionamentos
+
+--------------------------------------------------
+9) RESTAURAÇÃO NO COMPUTADOR NOVO
+--------------------------------------------------
+No novo computador:
+- Banco atual foi removido
+- Banco recriado
+- Backup importado
+
+Comandos:
+psql -U postgres -d banco
+\i banco.sql
+
+--------------------------------------------------
+10) VERIFICAÇÃO FINAL
+--------------------------------------------------
+Consultas realizadas:
+SELECT * FROM clientes;
+SELECT * FROM orcamentos;
+
+Resultado:
+- Dados restaurados
+- Sistema funcionando corretamente
+
+--------------------------------------------------
+11) CONCLUSÃO
+--------------------------------------------------
+O problema não era no código do projeto.
+O problema era a ausência da migração do banco de dados.
+
+Processo correto sempre que trocar de PC:
+1. Exportar banco com pg_dump
+2. Copiar o arquivo .sql
+3. Importar no novo PostgreSQL
+4. Só então rodar o projeto
+
+--------------------------------------------------
+DOCUMENTO CRIADO PARA USO FUTURO
+--------------------------------------------------
+Este arquivo serve como:
+- Manual de instalação
+- Histórico de resolução
+- Guia para novas instalações

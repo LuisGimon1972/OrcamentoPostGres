@@ -1,0 +1,24 @@
+📦 Gerando versão de produção
+bash
+Copiar
+Editar
+quasar build
+Os arquivos otimizados serão gerados na pasta /dist.
+
+✅ Como abrir em produção:
+1. Acesse a pasta dist/spa/:
+Esse é o diretório com os arquivos HTML, CSS e JS prontos para o navegador.
+
+2. Abrir localmente (simples e rápido)
+⚠️ Abrir direto com duplo clique no index.html pode causar problemas de rota se você estiver usando Vue Router em modo history.
+
+Solução recomendada: use um servidor local simples.
+
+Usando Node.js com http-server:
+bash
+Copiar
+Editar
+npm install -g http-server
+cd dist/spa
+http-server
+Acesse no navegador: http://localhost:8080
